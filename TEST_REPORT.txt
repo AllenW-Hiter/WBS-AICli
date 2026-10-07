@@ -1,0 +1,269 @@
+WBS-AICli 2.0.1 — Git branch preparation verification (2026-10-07)
+Environment: system Python 3.10.12.
+- Actual Bash self-test entry: 97 tests, 96 passed, 0 failures, 1 skip.
+- The skipped test requires tomllib, which is not in Python 3.10 stdlib.
+- Developer docs entry resolves to README_zh.md; release falls back to README.md.
+- Runtime config and .vscode editor state are excluded by .gitignore.
+- Release excludes README_zh.md, GIT_SETUP_zh.md and TEST_REPORT.txt.
+- test_toolkit.py remains in both branches for the user-facing self-test command.
+- No real CLI installation or provider API request was performed in this pass.
+
+The original source-package verification report follows for reference.
+
+WBS-AICli 2.0.1 — repository edition verification
+Environment: Linux container; system Python 3.13.5; Git 2.47.3.
+
+RESULTS
+- The 97 inherited offline tests were re-run via the actual Bash self-test entry
+  as unprivileged user nobody: 97 passed, 0 failures, 0 skips here.
+- Bash syntax check: passed. Reported manager version: 2.0.1.
+- Python 3.10 grammar parsing is covered by the offline test suite.
+- Additional real-Bash smoke under an isolated HOME as nobody: passed.
+  Includes a tool directory containing spaces and an apostrophe, install-shell,
+  sourcing .bashrc, preserved original content, menu entry and cancellation for
+  both clients, original working directory, current/config directory display,
+  dry-run installation, idempotent reinstall, and managed-block-only removal.
+- Disposable local Git repository check: passed. Existing README first commit
+  remains intact; runtime config and sample secret files are excluded even when
+  git add . is used in that disposable repository. Staged whitespace check passed.
+
+LIMITATIONS
+- No real Codex/Claude installation or real CLI session was launched in the
+  additional Bash smoke. Client behavior in unit tests is mocked/stubbed.
+- No provider API request, billing, tool calling, or streaming was tested.
+- No Ubuntu 22.04/24.04 VM/physical installation or ARM64 hardware verification.
+- No connection to, commit to, or push to the user's GitHub repository.
+- Provider presets are inherited unchanged from v2; this renaming pass did not
+  independently recheck every model, endpoint, account entitlement, or installer.
+- Python 3.10 lacks tomllib; the optional TOML parser test skips on that version.
+- Ignore rules and explicit staging are safeguards, not a complete secret scanner.
+
+===== Offline test output =====
+test_claude_session_secret_and_cleanup (test_toolkit.FileAndExecutionTests.test_claude_session_secret_and_cleanup) ... 启动 claude/glm | 模型：glm-5.2[1m] | https://open.bigmodel.cn/api/anthropic
+保留项目设置与组织管理策略；首次会话请检查 /status 和权限提示。
+ok
+test_codex_child_env_and_returncode (test_toolkit.FileAndExecutionTests.test_codex_child_env_and_returncode) ... 启动 codex/glm | 模型：glm-5.3 | https://open.bigmodel.cn/api/v1
+保留项目设置与组织管理策略；首次会话请检查 /status 和权限提示。
+ok
+test_configuration_cancel_leaves_no_files (test_toolkit.FileAndExecutionTests.test_configuration_cancel_leaves_no_files) ... ok
+test_constructor_does_not_create_tree (test_toolkit.FileAndExecutionTests.test_constructor_does_not_create_tree) ... ok
+test_custom_key_with_shell_characters_stays_literal (test_toolkit.FileAndExecutionTests.test_custom_key_with_shell_characters_stays_literal) ... ok
+test_doctor_is_read_only_and_redacted (test_toolkit.FileAndExecutionTests.test_doctor_is_read_only_and_redacted) ... ok
+test_dry_dependencies_read_dpkg_only (test_toolkit.FileAndExecutionTests.test_dry_dependencies_read_dpkg_only) ... ok
+test_dry_install_no_subprocess_or_files (test_toolkit.FileAndExecutionTests.test_dry_install_no_subprocess_or_files) ... ok
+test_dry_run_profile_no_key_or_execution (test_toolkit.FileAndExecutionTests.test_dry_run_profile_no_key_or_execution) ... ok
+test_host_managed_route_not_overridden (test_toolkit.FileAndExecutionTests.test_host_managed_route_not_overridden) ... ok
+test_install_download_review_execute_order (test_toolkit.FileAndExecutionTests.test_install_download_review_execute_order) ... ok
+test_installer_execution_declined (test_toolkit.FileAndExecutionTests.test_installer_execution_declined) ... ok
+test_installer_html_rejected (test_toolkit.FileAndExecutionTests.test_installer_html_rejected) ... ok
+test_key_removed_when_persistence_disabled (test_toolkit.FileAndExecutionTests.test_key_removed_when_persistence_disabled) ... ok
+test_launcher_collision_not_overwritten (test_toolkit.FileAndExecutionTests.test_launcher_collision_not_overwritten) ... ok
+test_launchers_contain_no_key_and_parse (test_toolkit.FileAndExecutionTests.test_launchers_contain_no_key_and_parse) ... ok
+test_malformed_backup_no_partial_restore (test_toolkit.FileAndExecutionTests.test_malformed_backup_no_partial_restore) ... ok
+test_misplaced_dry_run_rejected (test_toolkit.FileAndExecutionTests.test_misplaced_dry_run_rejected) ... ok
+test_no_key_saved_by_default (test_toolkit.FileAndExecutionTests.test_no_key_saved_by_default) ... ok
+test_original_configuration_preserved (test_toolkit.FileAndExecutionTests.test_original_configuration_preserved) ... ok
+test_overwrite_backup_contains_old_key (test_toolkit.FileAndExecutionTests.test_overwrite_backup_contains_old_key) ... ok
+test_probe_decline_no_request (test_toolkit.FileAndExecutionTests.test_probe_decline_no_request) ... ok
+test_probe_failed_exit_path_and_no_raw_key (test_toolkit.FileAndExecutionTests.test_probe_failed_exit_path_and_no_raw_key) ... ok
+test_probe_success_key_not_on_argv (test_toolkit.FileAndExecutionTests.test_probe_success_key_not_on_argv) ... ok
+test_reject_symlink_parent (test_toolkit.FileAndExecutionTests.test_reject_symlink_parent) ... ok
+test_reject_symlink_write (test_toolkit.FileAndExecutionTests.test_reject_symlink_write) ... ok
+test_reject_world_readable_key (test_toolkit.FileAndExecutionTests.test_reject_world_readable_key) ... ok
+test_restore_key_and_model (test_toolkit.FileAndExecutionTests.test_restore_key_and_model) ... ok
+test_save_permissions_and_roundtrip (test_toolkit.FileAndExecutionTests.test_save_permissions_and_roundtrip) ... ok
+test_temporary_secret_cleaned_on_interrupt (test_toolkit.FileAndExecutionTests.test_temporary_secret_cleaned_on_interrupt) ... 启动 claude/glm | 模型：glm-5.2[1m] | https://open.bigmodel.cn/api/anthropic
+保留项目设置与组织管理策略；首次会话请检查 /status 和权限提示。
+ok
+test_bad_state_not_silently_overwritten (test_toolkit.V2InteractionTests.test_bad_state_not_silently_overwritten) ... ok
+test_bash_conflict_during_confirmation_detected (test_toolkit.V2InteractionTests.test_bash_conflict_during_confirmation_detected) ... ok
+test_bash_conflicting_function_refused (test_toolkit.V2InteractionTests.test_bash_conflicting_function_refused) ... ok
+test_bash_decline_no_write (test_toolkit.V2InteractionTests.test_bash_decline_no_write) ... ok
+test_bash_dry_run_no_write (test_toolkit.V2InteractionTests.test_bash_dry_run_no_write) ... ok
+test_bash_duplicate_or_malformed_marker_refused (test_toolkit.V2InteractionTests.test_bash_duplicate_or_malformed_marker_refused) ... ok
+test_bash_functions_no_key_no_global_exports (test_toolkit.V2InteractionTests.test_bash_functions_no_key_no_global_exports) ... ok
+test_bash_install_idempotent (test_toolkit.V2InteractionTests.test_bash_install_idempotent) ... ok
+test_bash_install_preserves_original_and_home_permissions (test_toolkit.V2InteractionTests.test_bash_install_preserves_original_and_home_permissions) ... ok
+test_bash_invalid_syntax_refused_without_execution (test_toolkit.V2InteractionTests.test_bash_invalid_syntax_refused_without_execution) ... ok
+test_bash_missing_project_exits_with_useful_code (test_toolkit.V2InteractionTests.test_bash_missing_project_exits_with_useful_code) ... ok
+test_bash_remove_preserves_outside_text (test_toolkit.V2InteractionTests.test_bash_remove_preserves_outside_text) ... ok
+test_bash_symlink_refused (test_toolkit.V2InteractionTests.test_bash_symlink_refused) ... ok
+test_current_display_redacted (test_toolkit.V2InteractionTests.test_current_display_redacted) ... ok
+test_current_selection_changed_during_run_preserved (test_toolkit.V2InteractionTests.test_current_selection_changed_during_run_preserved) ... 启动 codex/glm | 模型：glm-5.3 | https://open.bigmodel.cn/api/v1
+保留项目设置与组织管理策略；首次会话请检查 /status 和权限提示。
+ok
+test_edit_enter_keeps_saved_key (test_toolkit.V2InteractionTests.test_edit_enter_keeps_saved_key) ... ok
+test_edit_key_updates_and_backs_up_old_key (test_toolkit.V2InteractionTests.test_edit_key_updates_and_backs_up_old_key) ... ok
+test_edit_model_clears_guessed_catalog (test_toolkit.V2InteractionTests.test_edit_model_clears_guessed_catalog) ... ok
+test_endpoint_change_decline_preserves_profile (test_toolkit.V2InteractionTests.test_endpoint_change_decline_preserves_profile) ... ok
+test_endpoint_change_forces_new_key (test_toolkit.V2InteractionTests.test_endpoint_change_forces_new_key) ... ok
+test_explicit_config_override (test_toolkit.V2InteractionTests.test_explicit_config_override) ... ok
+test_failed_executable_not_marked_success (test_toolkit.V2InteractionTests.test_failed_executable_not_marked_success) ... 启动 codex/glm | 模型：glm-5.3 | https://open.bigmodel.cn/api/v1
+保留项目设置与组织管理策略；首次会话请检查 /status 和权限提示。
+ok
+test_import_decline_leaves_new_config_empty (test_toolkit.V2InteractionTests.test_import_decline_leaves_new_config_empty) ... ok
+test_import_v1_regenerates_paths_preserves_original (test_toolkit.V2InteractionTests.test_import_v1_regenerates_paths_preserves_original) ... ok
+test_invalid_state_profile_path_rejected (test_toolkit.V2InteractionTests.test_invalid_state_profile_path_rejected) ... ok
+test_key_persistence_can_be_declined (test_toolkit.V2InteractionTests.test_key_persistence_can_be_declined) ... ok
+test_new_parser_commands (test_toolkit.V2InteractionTests.test_new_parser_commands) ... ok
+test_newly_entered_unsaved_key_can_persist (test_toolkit.V2InteractionTests.test_newly_entered_unsaved_key_can_persist) ... ok
+test_older_session_cannot_overwrite_newer_session_state (test_toolkit.V2InteractionTests.test_older_session_cannot_overwrite_newer_session_state) ... 启动 codex/glm | 模型：glm-5.3 | https://open.bigmodel.cn/api/v1
+保留项目设置与组织管理策略；首次会话请检查 /status 和权限提示。
+ok
+test_project_local_default_not_cwd_or_home (test_toolkit.V2InteractionTests.test_project_local_default_not_cwd_or_home) ... ok
+test_real_bash_claude_parameter_forwarding (test_toolkit.V2InteractionTests.test_real_bash_claude_parameter_forwarding) ... ok
+test_real_bash_functions_keep_cwd_and_forward_special_args (test_toolkit.V2InteractionTests.test_real_bash_functions_keep_cwd_and_forward_special_args) ... ok
+test_save_key_prompt_defaults_to_yes (test_toolkit.V2InteractionTests.test_save_key_prompt_defaults_to_yes) ... ok
+test_session_exit_record_and_no_secret (test_toolkit.V2InteractionTests.test_session_exit_record_and_no_secret) ... 启动 codex/glm | 模型：glm-5.3 | https://open.bigmodel.cn/api/v1
+保留项目设置与组织管理策略；首次会话请检查 /status 和权限提示。
+ok
+test_start_cancel_does_not_write_or_launch (test_toolkit.V2InteractionTests.test_start_cancel_does_not_write_or_launch) ... ok
+test_start_choose_other_saved_profile (test_toolkit.V2InteractionTests.test_start_choose_other_saved_profile) ... ok
+test_start_dry_run_has_no_side_effects (test_toolkit.V2InteractionTests.test_start_dry_run_has_no_side_effects) ... ok
+test_start_enter_reuses_saved_profile (test_toolkit.V2InteractionTests.test_start_enter_reuses_saved_profile) ... ok
+test_start_new_configuration_menu_path (test_toolkit.V2InteractionTests.test_start_new_configuration_menu_path) ... ok
+test_state_missing_does_not_create_files (test_toolkit.V2InteractionTests.test_state_missing_does_not_create_files) ... ok
+test_state_missing_profile_not_auto_switched (test_toolkit.V2InteractionTests.test_state_missing_profile_not_auto_switched) ... ok
+test_state_persists_independently_per_tool (test_toolkit.V2InteractionTests.test_state_persists_independently_per_tool) ... ok
+test_all_codex_toml_parses (test_toolkit.ValidationTests.test_all_codex_toml_parses) ... ok
+test_all_presets_valid (test_toolkit.ValidationTests.test_all_presets_valid) ... ok
+test_catalog_json_roundtrip (test_toolkit.ValidationTests.test_catalog_json_roundtrip) ... ok
+test_claude_auth_types (test_toolkit.ValidationTests.test_claude_auth_types) ... ok
+test_codex_protocol_is_responses (test_toolkit.ValidationTests.test_codex_protocol_is_responses) ... ok
+test_curl_quote (test_toolkit.ValidationTests.test_curl_quote) ... ok
+test_env_isolation (test_toolkit.ValidationTests.test_env_isolation) ... ok
+test_invalid_compact (test_toolkit.ValidationTests.test_invalid_compact) ... ok
+test_invalid_names (test_toolkit.ValidationTests.test_invalid_names) ... ok
+test_key_not_shell_evaluated (test_toolkit.ValidationTests.test_key_not_shell_evaluated) ... ok
+test_local_http (test_toolkit.ValidationTests.test_local_http) ... ok
+test_model_hints_allowed (test_toolkit.ValidationTests.test_model_hints_allowed) ... ok
+test_model_injection_rejected (test_toolkit.ValidationTests.test_model_injection_rejected) ... ok
+test_parser_cli_argument_forwarding (test_toolkit.ValidationTests.test_parser_cli_argument_forwarding) ... ok
+test_persistent_claude_settings_no_key (test_toolkit.ValidationTests.test_persistent_claude_settings_no_key) ... ok
+test_probe_routes_and_hint_removal (test_toolkit.ValidationTests.test_probe_routes_and_hint_removal) ... ok
+test_proxy_redacted (test_toolkit.ValidationTests.test_proxy_redacted) ... ok
+test_python_310_syntax (test_toolkit.ValidationTests.test_python_310_syntax) ... ok
+test_reject_unsafe_urls (test_toolkit.ValidationTests.test_reject_unsafe_urls) ... ok
+test_remote_https (test_toolkit.ValidationTests.test_remote_https) ... ok
+test_root_guard (test_toolkit.ValidationTests.test_root_guard) ... ok
+test_shell_syntax (test_toolkit.ValidationTests.test_shell_syntax) ... ok
+test_unknown_model_no_guessed_catalog (test_toolkit.ValidationTests.test_unknown_model_no_guessed_catalog) ... ok
+test_valid_names (test_toolkit.ValidationTests.test_valid_names) ... ok
+test_zero_context_disables_catalog (test_toolkit.ValidationTests.test_zero_context_disables_catalog) ... ok
+
+----------------------------------------------------------------------
+Ran 97 tests in 0.290s
+
+OK
+
+===== Ordinary-user Bash smoke output =====
+将安装/更新 ~/.bashrc 中标记包围的函数块。
+函数：aicli / aicodex / aiclaude；原始 codex / claude 命令不会被覆盖。
+# >>> AI-CLI-TOOLKIT FUNCTIONS >>>
+# Only function entry points; no API keys and no global provider exports.
+aicli() {
+    if [[ ! -f '/tmp/wbs-check-w3v4um2n/home/tools/WBS AICli '"'"'quoted'"'"'/ai_cli_setup.sh' ]]; then
+        printf '%s\n' '工具脚本不存在；请在工具的新位置重新运行 install-shell。' >&2
+        return 127
+    fi
+    command /bin/bash '/tmp/wbs-check-w3v4um2n/home/tools/WBS AICli '"'"'quoted'"'"'/ai_cli_setup.sh' "$@"
+}
+aicodex() { aicli start codex -- "$@"; }
+aiclaude() { aicli start claude -- "$@"; }
+# <<< AI-CLI-TOOLKIT FUNCTIONS <<<
+
+不写入 Key，不全局 export API 变量，不改变工作目录；先备份原 .bashrc。
+这是 Bash 函数，不自动修改 Zsh/Fish 或登录 Shell 的 .profile。
+确认备份后修改 .bashrc（输入 y 确认，其余取消） [n]: 原文件备份：/tmp/wbs-check-w3v4um2n/home/tools/WBS AICli 'quoted'/config/shell-backups/bashrc--20261006T154252184678Z.bak
+已写入。当前终端执行：source ~/.bashrc；也可新开一个 Bash 终端。
+从任意业务目录运行 aicodex / aiclaude；保留此工具目录，不要只留下 .sh。
+aicli is a function
+aicli ()
+{
+    if [[ ! -f '/tmp/wbs-check-w3v4um2n/home/tools/WBS AICli '"'"'quoted'"'"'/ai_cli_setup.sh' ]]; then
+        printf '%s\n' '工具脚本不存在；请在工具的新位置重新运行 install-shell。' 1>&2;
+        return 127;
+    fi;
+    command /bin/bash '/tmp/wbs-check-w3v4um2n/home/tools/WBS AICli '"'"'quoted'"'"'/ai_cli_setup.sh' "$@"
+}
+aicodex is a function
+aicodex ()
+{
+    aicli start codex -- "$@"
+}
+aiclaude is a function
+aiclaude ()
+{
+    aicli start claude -- "$@"
+}
+
+=== codex 交互启动 ===
+工作目录（不会自动切换）：/tmp/wbs-check-w3v4um2n/home/business project
+配置目录：/tmp/wbs-check-w3v4um2n/home/tools/WBS AICli 'quoted'/config
+尚无当前配置，可选择已保存的配置或新建。
+  1. 使用当前配置启动（默认）
+  2. 选择其他已保存配置并启动
+  3. 新建/重新指定 API 配置
+  4. 修改当前配置（地址 / 模型 / Key）
+  5. 查看全部已保存配置
+  0. 返回终端
+选择 [3]:
+=== claude 交互启动 ===
+工作目录（不会自动切换）：/tmp/wbs-check-w3v4um2n/home/business project
+配置目录：/tmp/wbs-check-w3v4um2n/home/tools/WBS AICli 'quoted'/config
+尚无当前配置，可选择已保存的配置或新建。
+  1. 使用当前配置启动（默认）
+  2. 选择其他已保存配置并启动
+  3. 新建/重新指定 API 配置
+  4. 修改当前配置（地址 / 模型 / Key）
+  5. 查看全部已保存配置
+  0. 返回终端
+选择 [3]: 工具项目：/tmp/wbs-check-w3v4um2n/home/tools/WBS AICli 'quoted'
+配置目录：/tmp/wbs-check-w3v4um2n/home/tools/WBS AICli 'quoted'/config
+codex: 尚未选择当前配置
+claude: 尚未选择当前配置
+当前配置是本工具的选择记录，不代表最近一次请求认证成功。
+
+安装/更新 codex：https://chatgpt.com/codex/install.sh
+使用官方原生安装器；先下载到文件、显示 SHA256，可查看内容，再单独确认执行。
+安装器及其下载的二进制属于第三方代码；当前 SHA256 是留档值，不等于独立的签名验证。
+[dry-run] 检查依赖 → 下载官方安装器 → 人工审阅/确认 → 普通用户执行 → 检查版本。
+
+安装/更新 claude：https://claude.ai/install.sh
+使用官方原生安装器；先下载到文件、显示 SHA256，可查看内容，再单独确认执行。
+安装器及其下载的二进制属于第三方代码；当前 SHA256 是留档值，不等于独立的签名验证。
+[dry-run] 检查依赖 → 下载官方安装器 → 人工审阅/确认 → 普通用户执行 → 检查版本。
+函数块已是当前内容；没有重复追加，没有创建多余备份。
+将移除 ~/.bashrc 中标记包围的函数块。
+函数：aicli / aicodex / aiclaude；原始 codex / claude 命令不会被覆盖。
+不写入 Key，不全局 export API 变量，不改变工作目录；先备份原 .bashrc。
+这是 Bash 函数，不自动修改 Zsh/Fish 或登录 Shell 的 .profile。
+确认备份后修改 .bashrc（输入 y 确认，其余取消） [n]: 原文件备份：/tmp/wbs-check-w3v4um2n/home/tools/WBS AICli 'quoted'/config/shell-backups/bashrc--20261006T154252765876Z.bak
+已移除持久函数块。当前终端执行：unset -f aicli aicodex aiclaude
+未删除 API 配置、密钥、备份或客户端。
+
+ORDINARY_USER_BASH_SMOKE=PASS
+
+===== Disposable Git verification =====
+.gitignore:2:/config/	config/profiles/codex/example/key.txt
+.gitignore:7:.env	.env
+.gitignore:14:*.key	sample.key
+.gitignore:2:/config/	config/shell-backups/saved.bashrc
+Tracked files after git add . in disposable repository:
+.gitattributes
+.gitignore
+CHANGELOG.md
+GIT_SETUP_zh.md
+PROVIDERS_zh.md
+README.md
+README_zh.md
+SHA256SUMS
+SOURCES.md
+TEST_REPORT.txt
+ai_cli_manager.py
+ai_cli_setup.sh
+test_toolkit.py
+git diff --cached --check exit=0
+Existing initial commit preserved: PASS
+Runtime and sample secret files excluded: PASS
+No GitHub network operation performed.
