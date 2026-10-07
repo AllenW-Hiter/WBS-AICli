@@ -1,0 +1,25 @@
+# Runtime: API keys, native CLI login/history, backups, cached installers.
+/config/
+/backups/
+/shell-backups/
+
+# Credentials (examples can be committed only after a manual review).
+.env
+.env.*
+!.env.example
+key.txt
+auth.json
+credentials.json
+*.pem
+*.key
+
+# Local development and generated output.
+.vscode/
+__pycache__/
+*.py[cod]
+.venv/
+.conda/
+/dist/
+*.log
+*.bak
+.DS_Store
