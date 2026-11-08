@@ -26,7 +26,6 @@ import stat
 import subprocess
 import sys
 import tempfile
-import unittest
 import uuid
 from urllib.parse import urlsplit, urlunsplit, quote
 
@@ -443,7 +442,8 @@ def replace_shell_file(path: Path, raw: bytes, mode: int) -> None:
 
 class App:
     def __init__(self, home: Path | None = None, dry_run: bool = False,
-                 project: Path | None = None, config_root: Path | None = None):
+                 project: Path | None = None, config_root: Path | None = None,
+                 allow_root: bool = False):
         self.home = (home or Path.home()).absolute()
         self.project = (project or SOURCE_DIR).absolute()
         self.root = (config_root or (self.project / "config")).expanduser().absolute()
@@ -451,11 +451,12 @@ class App:
         self.data = self.root / "cache"
         self.bin = self.home / ".local" / "bin"
         self.dry_run = dry_run
+        self.allow_root = allow_root
         self.proxy_overrides: dict[str, str | None] = {}
 
     def guard(self) -> None:
-        if os.geteuid() == 0 and not self.dry_run:
-            raise UserError("请以普通用户运行脚本，不要 sudo bash；仅安装缺失依赖时会单独调用 sudo。")
+        if os.geteuid() == 0 and not (self.dry_run or self.allow_root):
+            raise UserError("默认仅允许普通用户运行；AutoDL 等 root 环境请显式传入 --allow-root（放在子命令之前）。")
         if platform.system() != "Linux":
             raise UserError("本脚本仅面向 Linux / Debian 系统。")
 
@@ -553,16 +554,19 @@ class App:
             return
         say("仅安装缺失依赖：" + ", ".join(missing))
         say("不会安装 Node.js、pip 包，不会执行 upgrade / full-upgrade，也不替换 APT 源。")
+        prefix = [] if os.geteuid() == 0 else ["sudo"]
+        update_command = [*prefix, "apt-get", "update"]
+        install_command = [*prefix, "apt-get", "install", "--no-install-recommends", *missing]
         if self.dry_run:
-            say("[dry-run] sudo apt-get update")
-            say("[dry-run] sudo apt-get install --no-install-recommends " + " ".join(missing))
+            say("[dry-run] " + shlex.join(update_command))
+            say("[dry-run] " + shlex.join(install_command))
             return
         if not confirm("执行上述 APT 操作"):
             return
-        if not shutil.which("sudo"):
+        if prefix and not shutil.which("sudo"):
             raise UserError("缺少 sudo，请让管理员安装上述依赖后重试。")
-        subprocess.run(["sudo", "apt-get", "update"], check=True)
-        subprocess.run(["sudo", "apt-get", "install", "--no-install-recommends", *missing], check=True)
+        subprocess.run(update_command, check=True)
+        subprocess.run(install_command, check=True)
 
     def install(self, tool: str) -> None:
         if tool == "both":
@@ -576,7 +580,8 @@ class App:
         say("使用官方原生安装器；先下载到文件、显示 SHA256，可查看内容，再单独确认执行。")
         say("安装器及其下载的二进制属于第三方代码；当前 SHA256 是留档值，不等于独立的签名验证。")
         if self.dry_run:
-            say("[dry-run] 检查依赖 → 下载官方安装器 → 人工审阅/确认 → 普通用户执行 → 检查版本。")
+            user = "root" if os.geteuid() == 0 else "当前用户"
+            say(f"[dry-run] 检查依赖 → 下载官方安装器 → 人工审阅/确认 → {user} 执行 → 检查版本。")
             return
         self.deps()
         if not shutil.which("curl"):
@@ -876,10 +881,11 @@ class App:
             target = self.project
             private_dir(self.bin)
             prefix = "#!/usr/bin/env bash\n# AI-CLI-TOOLKIT MANAGED LAUNCHER\nset -euo pipefail\nset +x\n"
-            launchers = {"ai-cli": prefix + f'exec /usr/bin/python3 -B -I {shlex.quote(str(target / "ai_cli_manager.py"))} --config-dir {shlex.quote(str(self.root))} "$@"\n'}
+            root_option = " --allow-root" if self.allow_root else ""
+            launchers = {"ai-cli": prefix + f'exec /usr/bin/python3 -B -I {shlex.quote(str(target / "ai_cli_manager.py"))}{root_option} --config-dir {shlex.quote(str(self.root))} "$@"\n'}
             for p in profiles:
                 filename = f'{p["tool"]}-{p["name"]}'
-                launchers[filename] = prefix + f'exec /usr/bin/python3 -B -I {shlex.quote(str(target / "ai_cli_manager.py"))} --config-dir {shlex.quote(str(self.root))} run {p["tool"]} {p["name"]} -- "$@"\n'
+                launchers[filename] = prefix + f'exec /usr/bin/python3 -B -I {shlex.quote(str(target / "ai_cli_manager.py"))}{root_option} --config-dir {shlex.quote(str(self.root))} run {p["tool"]} {p["name"]} -- "$@"\n'
             # Validate ALL collisions before writing any launcher.
             for name in launchers:
                 path = self.bin / name
@@ -1156,6 +1162,7 @@ class App:
 
     def bash_block(self) -> str:
         script = shlex.quote(str(self.project / "ai_cli_setup.sh"))
+        root_option = " --allow-root" if self.allow_root else ""
         config_option = "" if self.root == self.project / "config" else " --config-dir " + shlex.quote(str(self.root))
         return (BASH_BEGIN + "\n"
                 "# Only function entry points; no API keys and no global provider exports.\n"
@@ -1164,7 +1171,7 @@ class App:
                 "        printf '%s\\n' '工具脚本不存在；请在工具的新位置重新运行 install-shell。' >&2\n"
                 "        return 127\n"
                 "    fi\n"
-                f'    command /bin/bash {script}{config_option} "$@"\n'
+                f'    command /bin/bash {script}{root_option}{config_option} "$@"\n'
                 "}\n"
                 'aicodex() { aicli start codex -- "$@"; }\n'
                 'aiclaude() { aicli start claude -- "$@"; }\n'
@@ -1235,7 +1242,8 @@ class App:
         self.guard()
         if self.root == self.legacy_root:
             raise UserError("当前配置目录已经是 v1 目录，无需向自身导入。")
-        legacy = App(home=self.home, project=self.project, config_root=self.legacy_root)
+        legacy = App(home=self.home, project=self.project, config_root=self.legacy_root,
+                     allow_root=self.allow_root)
         options = legacy.profiles()
         if not options:
             say("未找到旧版工具配置：" + str(self.legacy_root))
@@ -1305,10 +1313,11 @@ def show_docs() -> None:
 def parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="WBS-AICli — Ubuntu/Debian Codex + Claude Code 安装、隔离配置和启动器。")
     p.add_argument("--dry-run", action="store_true", help="只显示计划；必须放在子命令之前")
+    p.add_argument("--allow-root", action="store_true", help="允许 root 运行（如 AutoDL）；子进程继承 root 权限，必须放在子命令之前")
     p.add_argument("--version", action="version", version=VERSION)
     p.add_argument("--config-dir", type=Path, help="高级选项：覆盖配置目录；默认是工具项目/config，不是当前工作目录")
     sub = p.add_subparsers(dest="command")
-    for name in ("menu", "doctor", "deps", "list", "launchers", "restore", "docs", "self-test", "install-shell", "remove-shell", "import-v1", "current"):
+    for name in ("menu", "doctor", "deps", "list", "launchers", "restore", "docs", "install-shell", "remove-shell", "import-v1", "current"):
         sub.add_parser(name)
     sub.add_parser("install").add_argument("tool", choices=(*TOOLS, "both"))
     sub.add_parser("configure").add_argument("tool", choices=TOOLS)
@@ -1342,7 +1351,7 @@ def display_error(exc: Exception) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     args = parser().parse_args(argv)
-    app = App(dry_run=args.dry_run, config_root=args.config_dir)
+    app = App(dry_run=args.dry_run, config_root=args.config_dir, allow_root=args.allow_root)
     command = args.command or "menu"
     try:
         if command == "menu": return app.menu()
@@ -1365,18 +1374,6 @@ def main(argv: list[str] | None = None) -> int:
         elif command == "launchers": app.install_launchers()
         elif command == "restore": app.restore()
         elif command == "docs": show_docs()
-        elif command == "self-test":
-            if app.dry_run:
-                say("[dry-run] 将运行离线 unittest；不执行。")
-            else:
-                import importlib.util
-                spec = importlib.util.spec_from_file_location("test_toolkit", SOURCE_DIR / "test_toolkit.py")
-                if spec is None or spec.loader is None:
-                    raise UserError("测试文件不存在。")
-                tests = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(tests)
-                result = unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromModule(tests))
-                return 0 if result.wasSuccessful() else 1
         return 0
     except (UserError, OSError, subprocess.SubprocessError, ValueError, TypeError) as exc:
         display_error(exc)

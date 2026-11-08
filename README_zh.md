@@ -6,11 +6,11 @@
 
 “项目内保存”指本工具项目的 `config/`，不是你正在开发的业务代码仓库。不要将 API Key 放进业务仓库的 `.env`、`.bashrc` 或 Git。
 
-> 从 v2 更名而来；日常命令、配置格式、密钥环境变量和旧管理标记保持兼容。已初始化 Git 仓库时，先看 `GIT_SETUP_zh.md`，不要再次 `git init`。
+> 从 v2 更名而来；日常命令、配置格式、密钥环境变量和旧管理标记保持兼容。
 
 ## 1. 一次性设置
 
-请使用普通用户，不要 `sudo bash`。仅安装缺失的系统依赖时会单独请求 sudo。
+默认以普通用户运行，仅安装缺失的系统依赖时会单独请求 sudo。AutoDL 等默认 root 的环境需要显式传入 `--allow-root`，具体步骤见本节末尾。
 
 先把整个工具包解压到一个不会随手删除的固定目录。例如在下载文件所在目录执行：
 
@@ -34,6 +34,26 @@ source ~/.bashrc
 **正确路径是 `~/.bashrc`，不是 `~/bashrc`。** Bash 的交互式非登录 Shell 通常读取前者；登录 Shell 的读取链由 `.bash_profile` / `.profile` 决定。函数没有出现时，在 Bash 终端手动执行 `source ~/.bashrc`。本工具不修改登录配置或 Zsh/Fish 配置。[S18]
 
 此后不需要再进入工具目录，也不要求把工具目录加入 PATH。工具的 Bash 入口会使用系统 `/usr/bin/python3 -B -I`，不会使用当前 Conda 环境中的 Python。
+
+### AutoDL 等 root 环境
+
+root 下为需要安装、配置或启动的命令显式添加 `--allow-root`，放在子命令之前。例如：
+
+```bash
+bash ai_cli_setup.sh --allow-root install-shell
+source ~/.bashrc
+
+aicli install both
+aicli configure codex
+aicli configure claude
+aicodex
+```
+
+通过上述方式安装的函数会保留 `--allow-root`，之后运行 `aicli`、`aicodex`、`aiclaude` 无需重复添加。旧式快捷命令也可使用 `bash ai_cli_setup.sh --allow-root launchers` 生成，它们同样保留该选项。不安装入口时，每次直接调用脚本都需要显式传入，例如 `bash ai_cli_setup.sh --allow-root start claude`。
+
+缺失系统依赖在 root 下直接通过 `apt-get` 安装，不依赖 `sudo`；普通用户保持原来的 sudo 流程。程序路径和 Shell 入口沿用当前用户的 HOME，通常为 `/root/.local/bin` 和 `/root/.bashrc`；配置仍默认保存在工具项目的 `config/`，也可通过 `--config-dir` 指定。
+
+安装器与客户端会以当前 root 身份运行；`--allow-root` 只放开本管理器的检查，客户端自身的权限检查仍然生效。只读检查和 `--dry-run` 无需启用 root 权限。
 
 ## 2. 日常只用三个入口
 
@@ -173,8 +193,6 @@ WBS-AICli/
   PROVIDERS_zh.md
   SOURCES.md
   CHANGELOG.md
-  test_toolkit.py
-  TEST_REPORT.txt
   SHA256SUMS
   .gitignore
   config/                          # 运行时创建，不在发行包中
@@ -228,7 +246,6 @@ aicli --dry-run install both       # 预演安装
 aicli --dry-run install-shell      # 预览函数安装，不写文件
 aicli --dry-run start codex        # 预演交互启动，不读 Key
 aicli restore                     # 恢复本工具管理的配置快照
-aicli self-test                   # 离线测试，不安装真实客户端，不调用真实 API
 
 # 这些仍先显示本工具的交互菜单，再将参数传给原生 CLI
 aicodex exec '说明这个测试项目的结构'
@@ -239,11 +256,11 @@ aicli run codex glm -- exec '说明这个测试项目的结构'
 aicli run claude deepseek -- -p '说明这个测试项目的结构'
 ```
 
-`--dry-run` 和 `--config-dir` 是管理器参数，放在子命令前；不要写成 `aicodex --dry-run`。高级场景可用 `bash /绝对路径/ai_cli_setup.sh --config-dir /私有目录 ...`；默认无需设置。
+`--dry-run`、`--allow-root` 和 `--config-dir` 是管理器参数，放在子命令前；不要写成 `aicodex --dry-run` 或 `aicodex --allow-root`。高级场景可用 `bash /绝对路径/ai_cli_setup.sh --config-dir /私有目录 ...`；默认无需设置。
 
 恢复命令恢复 profile、Key 与客户端管理配置，不是整机备份，不恢复二进制、完整会话或官方登录态。备份包含绝对模型目录位置，默认用于原路径恢复，不作为跨路径迁移工具。
 
-代理可在 `aicli` 主菜单 12 设置，只作用于该次管理器及其启动的子进程，不保存。退出菜单后不会让随后新开的 `aicodex` 自动继承刚才的临时代理；需要同一次代理上下文时，在该菜单内使用选项 8 启动。APT 经 sudo 的代理继承由系统配置决定。
+代理可在 `aicli` 主菜单 12 设置，只作用于该次管理器及其启动的子进程，不保存。退出菜单后不会让随后新开的 `aicodex` 自动继承刚才的临时代理；需要同一次代理上下文时，在该菜单内使用选项 8 启动。普通用户的 APT 经 sudo，代理继承由系统配置决定；root 直接调用 APT。
 
 ## 10. 卸载入口、更新和移动目录
 
@@ -258,7 +275,7 @@ unset -f aicli aicodex aiclaude
 
 查看/手动恢复 `.bashrc` 备份时，注意整文件恢复也会回退你之后的其他更改。正常只撤销本工具入口，优先使用 `remove-shell`。
 
-更新本工具时，应保留现有 `config/`，仅更新程序、文档和测试文件；不要把含真实 Key 的旧目录无差别上传。更新后从实际安装目录重新执行 `bash ai_cli_setup.sh install-shell`。
+更新本工具时，应保留现有 `config/`，仅更新程序和文档；不要把含真实 Key 的旧目录无差别上传。更新后从实际安装目录重新执行 `bash ai_cli_setup.sh install-shell`，root 环境使用 `bash ai_cli_setup.sh --allow-root install-shell`。
 
 建议保持工具目录固定。整体移动目录后，先重新注册函数；使用 Codex 模型目录配置时，还需要对相应配置运行 `aicli edit codex 配置名` 并确认保存，以重新生成原生配置中的绝对路径。仅修改 `.bashrc` 路径并不会自动修复所有旧备份中的路径。
 
@@ -266,8 +283,10 @@ unset -f aicli aicodex aiclaude
 
 ## 11. 验证范围
 
-本更名版重新执行 **97 项离线自动化测试**，包括真实 Bash 语法与函数转发测试、Python 3.10 语法解析、项目内配置、独立选择记忆、更新密钥、端点变化禁止旧 Key 自动复用、工作目录保留、管理标记幂等与 v1 导入等。详细结果和本轮附加检查见 `TEST_REPORT.txt`。
+`doctor` 仅检查本地环境，不安装、不修改配置、不运行原生客户端，也不请求 AI API。`test` 命令经确认后发送一次基础 API 探测，仅检查短文本的非流式协议响应，完整的流式响应、工具调用和长任务需要在实际客户端中验证。
 
-**没有在 Ubuntu 22.04/24.04 真机或虚拟机上验证上游在线安装，没有使用真实 Key 调用任何服务商，也没有做 ARM64 实机认证。** Python 3.10 的标准库没有 `tomllib`，在该版本运行自测时 TOML 解析测试会明确跳过，不因此要求安装 pip 包。
+**没有在 AutoDL 或 Ubuntu 22.04/24.04 真机或虚拟机上验证上游在线安装，没有使用真实 Key 调用任何服务商，也没有做 ARM64 实机认证。**
 
-本轮更名不变更服务商预设，也不宣称重新完成供应商在线核验。预设继承原包的文档快照；实际模型权限和接口行为仍需使用自己的账号验证。
+仓库只包含程序和使用资料；测试脚本、开发报告、AI 工具配置及编辑器缓存不随项目分发，并通过 `.gitignore` 排除。
+
+本次 root 支持不变更服务商预设，也不宣称重新完成供应商在线核验。预设继承原包的文档快照；实际模型权限和接口行为仍需使用自己的账号验证。

@@ -12,11 +12,53 @@ auth.json
 credentials.json
 *.pem
 *.key
+.aws/
 
-# Local development and generated output.
+# AI coding assistants and local IDE configuration.
+.agents/
+.codex/
+.claude/
+.cursor/
+.continue/
+.windsurf/
+.trae/
+.aider*
+AGENTS.md
+AGENTS.override.md
+CLAUDE.md
+CLAUDE.local.md
+CODEX.md
+GEMINI.md
+.cursorrules
+.cursorignore
+.windsurfrules
+.copilotignore
+.github/copilot-instructions.md
+.github/instructions/
+.github/prompts/
 .vscode/
+.idea/
+
+# Tests, development reports, caches and generated output.
+/test/
+/tests/
+test_*.py
+*_test.py
+/TEST_REPORT*.txt
+/GIT_SETUP_zh.md
+.cache/
+cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage/
 __pycache__/
 *.py[cod]
+*.vc.db
+*.vc.db-*
 .venv/
 .conda/
 /dist/

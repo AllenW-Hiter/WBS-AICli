@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# WBS-AICli — Ubuntu 22.04/24.04 / Debian family. Run as a regular user, NOT with sudo.
+# WBS-AICli — Ubuntu 22.04/24.04 / Debian family. Root requires --allow-root.
 set -euo pipefail
 set +x
 HERE="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"

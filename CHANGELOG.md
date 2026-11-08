@@ -1,3 +1,12 @@
+# Unreleased — root support and project cleanup
+
+- 新增管理器全局参数 `--allow-root`，为 AutoDL 等默认 root 的 Linux 环境显式启用安装、配置和启动；未启用时保持原有 root 拦截。
+- root 安装缺失依赖时直接调用 `apt-get`，普通用户仍使用 `sudo`；预演显示与当前身份一致的命令。
+- Bash 函数与旧式快捷命令保留显式传入的 `--allow-root`，路径沿用当前用户 HOME；旧配置导入继承该选项。
+- 精简为运行程序与使用资料，删除测试脚本、测试报告和仓库开发指南，移除开发用 `self-test` 命令与测试框架导入；保留用户使用的 API 基础探测。
+- 清理编辑器与安装器缓存，将 AI 编程助手文件、IDE 配置、测试文件和缓存加入 Git 忽略规则。
+- 补充 AutoDL/root 使用说明；本轮未进行真实 AutoDL 部署、上游安装或服务商 API 调用。
+
 # 2.0.1 — WBS-AICli repository edition
 
 - 区分 `main` 发布版与 `dev` 开发版；发布版精简开发文档，保留离线自检，教程入口兼容单独的 README.md。
